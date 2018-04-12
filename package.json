@@ -1,0 +1,29 @@
+{
+  "name": "wechat",
+  "version": "1.0.0",
+  "description": "WeChat Demo",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JansenGao/WeChat.git"
+  },
+  "keywords": [
+    "Wechat"
+  ],
+  "author": "Jansen Gao",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JansenGao/WeChat/issues"
+  },
+  "homepage": "https://github.com/JansenGao/WeChat#readme",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "jshint": "^2.9.5"
+  }
+}
