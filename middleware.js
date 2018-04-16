@@ -1,7 +1,7 @@
 var log4js = require('log4js');
 const config = require('./config/config');
 const crypto = require('crypto');
-const util = require('./lib/util');
+const utils = require('./lib/utils');
 
 /**
  * @param  {} req
@@ -31,6 +31,6 @@ exports.wechatValidate = function(req, res, next) {
     if(result == signature){
         next();
     }else{
-        return util.resError(res, '验证失败');
+        return utils.resError(res, '验证失败');
     }
 }

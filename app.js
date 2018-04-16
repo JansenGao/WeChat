@@ -4,7 +4,6 @@ var crypto = require('crypto');
 var url = require('url');
 var log4js = require('log4js');
 var wechatValidate = require('./middleware').wechatValidate;
-var util = require('./lib/util');
 var o2x = require('object-to-xml');
 var bodyParser = require('body-parser');
 
@@ -26,6 +25,26 @@ app.post('*', wechatValidate, (req, res) => {
 		logger.debug(req.body[key]);
     }
 
+    var replyContent = '';
+    switch(req.body.xml.MsgType){
+        case 'text':
+            replyContent = '';
+            break;
+        case 'voice':
+            replyContent = '你发送了语音信息';
+            break;
+        case 'image':
+            replyContent = '你发送了图片信息，链接为' + req.body.xml.PicUrl;
+            break;
+        case 'location':
+            replyContent = util.format('你发送了地理信息，坐标为{X:%s, Y:%s, Label:%s}', req.body.xml.Location_X, req.body.xml.Location_Y, req.body.xml.Label);
+            break;
+        default:
+            replyContent = '其他信息';
+            break;
+    }
+        
+
     res.set('Content-Type', 'text/xml');
     res.send(o2x({
         '?xml version="1.0" encoding="utf-8"?' : null,
@@ -34,7 +53,7 @@ app.post('*', wechatValidate, (req, res) => {
             'FromUserName': req.body.xml.FromUserName,
             'CreateTime': Date.now(),
             'MsgType': 'text',
-            'Content': req.body
+            'Content': replyContent
         }
     }));
 });
