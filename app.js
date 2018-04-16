@@ -29,7 +29,25 @@ app.use('/wechat', wechat(global.wechatConfig, function(req, res, next){
     for(var key in message){
         global.logger.debug('message.%s=%s', key, message[key]);
     }
-	res.reply('Hello');
+    var repl_message = '';
+    switch(message.MsgType){
+        case 'text':
+            repl_message = util.format('收到:%s', message.Content);
+            break;
+        case 'image':
+            repl_message = '收到你的图像';
+            break;
+        case 'voice':
+            repl_message = '收到你的音频';
+            break;
+        case 'video':
+            repl_message = '收到你的视频';
+            break;
+        default:
+            repl_message = 'Hello';
+            break;
+    }
+    res.reply(repl_message);
 }));
 
 app.listen(80, () => {
