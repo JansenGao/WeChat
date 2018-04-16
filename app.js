@@ -6,6 +6,7 @@ var log4js = require('log4js');
 var wechatValidate = require('./middleware').wechatValidate;
 var o2x = require('object-to-xml');
 var bodyParser = require('body-parser');
+var util = require('util');
 
 var wechat = require('wechat');
 
@@ -43,6 +44,12 @@ app.use('/wechat', wechat(global.wechatConfig, function(req, res, next){
         case 'video':
             repl_message = '收到你的视频';
             break;
+	case 'location':
+	    repl_message = '收到你的位置';
+	    break;
+	case 'link':
+	    repl_message = '收到你的链接';
+	    break;
         default:
             repl_message = 'Hello';
             break;
