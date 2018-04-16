@@ -1,5 +1,5 @@
 {
-  "name": "wechat",
+  "name": "WechatDemo",
   "version": "1.0.0",
   "description": "WeChat Demo",
   "main": "app.js",
@@ -25,7 +25,8 @@
     "crypto": "^1.0.1",
     "express": "^4.16.3",
     "log4js": "^2.5.3",
-    "object-to-xml": "^1.1.0"
+    "object-to-xml": "^1.1.0",
+    "wechat": "^2.1.0"
   },
   "devDependencies": {
     "jshint": "^2.9.5"
