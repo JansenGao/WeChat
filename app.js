@@ -1,10 +1,14 @@
 const express = require('express');
 const config = require('./config/config');
 const crypto = require('crypto');
+const url = require('url');
+var bodyParser = require('body-parser');
+require('body-parser-xml')(bodyParser);
 
 const ENV = "develop";
 
 app = express();
+app.use(bodyParser.xml());
 
 app.get('/wechat', (req, res) => {
     // 1. 获取请求参数
@@ -13,8 +17,15 @@ app.get('/wechat', (req, res) => {
     var nonce = req.query.nonce;
     var echostr = req.query.echostr;
 
+    console.log('请求到达')
+    console.log('signature=%s', signature);
+    console.log('timestamp=%s', timestamp);
+    console.log('nonce=%s', nonce);
+    console.log('echostr=%s', echostr);
+
     // 2. 将token,timestamp,nonce三个参数按字典排序
-    var array = [config[ENV].wechat.appsecret, timestamp, nonce];
+    var array = [config[ENV].wechat.token, timestamp, nonce];
+    console.log('array=%s', array);
     array.sort();
 
     // 3. 将三个参数字符串拼接成一个字符串并进行SHA1加密
@@ -22,15 +33,28 @@ app.get('/wechat', (req, res) => {
     const hashCode = crypto.createHash('sha1');
     var result = hashCode.update(tmpStr, 'utf8').digest('hex');
 
+    console.log('result=%s', result);
     // 4. 将加密后字符串与signature对比
     if(result == signature){
-        res.send('success');
+        res.send(echostr);
     }else{
         res.send('error');
     }
 
 });
 
-app.listen(3000, () => {
+app.post('*', (req, res) => {
+	console.log('请求到达');
+	const { method, url} = req;
+	console.log('method=%s', method);
+	console.log('url=%s', url);
+	console.log('body=%s', req.body);
+	for(key in req.body){
+		console.log(req.body[key]);
+	}
+	res.send();
+});
+
+app.listen(80, () => {
     console.log('Server started on http://localhost:3000');
 });
