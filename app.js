@@ -1,13 +1,7 @@
 var express = require('express');
 var config = require('./config/config');
-var crypto = require('crypto');
-var url = require('url');
 var log4js = require('log4js');
-var wechatValidate = require('./middleware').wechatValidate;
-var o2x = require('object-to-xml');
-var bodyParser = require('body-parser');
 var util = require('util');
-
 var wechat = require('wechat');
 
 app = express();
