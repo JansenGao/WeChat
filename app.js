@@ -6,7 +6,7 @@ const ENV = "develop";
 
 app = express();
 
-app.get('/', (req, res) => {
+app.get('/wechat', (req, res) => {
     // 1. 获取请求参数
     var signature = req.query.signature;
     var timestamp = req.query.timestamp;
@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
     var echostr = req.query.echostr;
 
     // 2. 将token,timestamp,nonce三个参数按字典排序
-    var array = [config[ENV].wechat.appID, timestamp, nonce];
+    var array = [config[ENV].wechat.appsecret, timestamp, nonce];
     array.sort();
 
     // 3. 将三个参数字符串拼接成一个字符串并进行SHA1加密
