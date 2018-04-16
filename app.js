@@ -1,60 +1,47 @@
-const express = require('express');
-const config = require('./config/config');
-const crypto = require('crypto');
-const url = require('url');
+var express = require('express');
+var config = require('./config/config');
+var crypto = require('crypto');
+var url = require('url');
+var log4js = require('log4js');
+var wechatValidate = require('./middleware').wechatValidate;
+var util = require('./lib/util');
+var o2x = require('object-to-xml');
 var bodyParser = require('body-parser');
+
 require('body-parser-xml')(bodyParser);
 
-const ENV = "develop";
+global.currConfig = config.develop;
+
+var logger = log4js.getLogger();
+logger.level = global.currConfig.log_level;
 
 app = express();
 app.use(bodyParser.xml());
 
-app.get('/wechat', (req, res) => {
-    // 1. 获取请求参数
-    var signature = req.query.signature;
-    var timestamp = req.query.timestamp;
-    var nonce = req.query.nonce;
-    var echostr = req.query.echostr;
-
-    console.log('请求到达')
-    console.log('signature=%s', signature);
-    console.log('timestamp=%s', timestamp);
-    console.log('nonce=%s', nonce);
-    console.log('echostr=%s', echostr);
-
-    // 2. 将token,timestamp,nonce三个参数按字典排序
-    var array = [config[ENV].wechat.token, timestamp, nonce];
-    console.log('array=%s', array);
-    array.sort();
-
-    // 3. 将三个参数字符串拼接成一个字符串并进行SHA1加密
-    var tmpStr = array.join('');
-    const hashCode = crypto.createHash('sha1');
-    var result = hashCode.update(tmpStr, 'utf8').digest('hex');
-
-    console.log('result=%s', result);
-    // 4. 将加密后字符串与signature对比
-    if(result == signature){
-        res.send(echostr);
-    }else{
-        res.send('error');
+app.post('*', wechatValidate, (req, res) => {
+	const { method, url} = req;
+	logger.debug('method=%s', method);
+	logger.debug('url=%s', url);
+	for(var key in req.body){
+		logger.debug(req.body[key]);
     }
 
+    res.set('Content-Type', 'text/xml');
+    res.send(o2x({
+        '?xml version="1.0" encoding="utf-8"?' : null,
+        'xml': {
+            'ToUserName': req.body.xml.ToUserName,
+            'FromUserName': req.body.xml.FromUserName,
+            'CreateTime': Date.now(),
+            'MsgType': 'text',
+            'Content': req.body
+        }
+    }));
 });
 
-app.post('*', (req, res) => {
-	console.log('请求到达');
-	const { method, url} = req;
-	console.log('method=%s', method);
-	console.log('url=%s', url);
-	console.log('body=%s', req.body);
-	for(key in req.body){
-		console.log(req.body[key]);
-	}
-	res.send();
-});
+// var port = global.currConfig.port;
+app.set('port', global.currConfig.port || 3000);
 
-app.listen(80, () => {
-    console.log('Server started on http://localhost:3000');
+app.listen(app.get('port'), () => {
+    console.log('Server started on http://localhost:%d', app.get('port'));
 });

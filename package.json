@@ -23,7 +23,9 @@
     "body-parser": "^1.18.2",
     "body-parser-xml": "^1.1.0",
     "crypto": "^1.0.1",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "log4js": "^2.5.3",
+    "object-to-xml": "^1.1.0"
   },
   "devDependencies": {
     "jshint": "^2.9.5"
