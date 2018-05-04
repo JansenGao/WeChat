@@ -6,7 +6,7 @@ var wechat = require('wechat');
 
 app = express();
 
-var env = "develop";
+var env = config.environment;
 global.wechatConfig = {
     token: config[env].wechat.token,
     appid: config[env].wechat.appid,
@@ -18,7 +18,7 @@ global.logger = log4js.getLogger();
 global.logger.level = config[env].log_level;
 
 app.use(express.query());
-app.use('/wechat', wechat(global.wechatConfig, function(req, res, next){
+app.use('/', wechat(global.wechatConfig, function(req, res, next){
     global.logger.debug('收到请求');
     var message = req.weixin;
     for(var key in message){
@@ -51,6 +51,7 @@ app.use('/wechat', wechat(global.wechatConfig, function(req, res, next){
     res.reply(repl_message);
 }));
 
-app.listen(80, () => {
-	console.log('Server started at http://localhost');
+const PORT = config[env].port;
+app.listen(PORT, () => {
+	console.log('Server started at http://localhost:%d', PORT);
 });
