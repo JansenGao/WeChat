@@ -3,6 +3,9 @@ var config = require('./config/config');
 var log4js = require('log4js');
 var util = require('util');
 var wechat = require('wechat');
+var redis = require('redis');
+var logger = require('./utils/logger').logger;
+var DB = require('./utils/db_mysql').DB;
 
 app = express();
 
@@ -14,15 +17,12 @@ global.wechatConfig = {
     checkSignature: true
 };
 
-global.logger = log4js.getLogger();
-global.logger.level = config[env].log_level;
-
 app.use(express.query());
 app.use('/', wechat(global.wechatConfig, function(req, res, next){
-    global.logger.debug('收到请求');
+    logger.debug('收到请求');
     var message = req.weixin;
     for(var key in message){
-        global.logger.debug('message.%s=%s', key, message[key]);
+        logger.debug('message.%s=%s', key, message[key]);
     }
     var repl_message = '';
     switch(message.MsgType){
