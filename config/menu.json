@@ -1,0 +1,29 @@
+{
+    "button": [
+        {
+            "name": "表单上传",
+            "sub_button": [
+                {
+                    "type": "pic_photo_or_album",
+                    "name": "进料加工报关单",
+                    "key": "submit_form_1"
+                },
+                {
+                    "type": "pic_photo_or_album",
+                    "name": "来料加工补偿贸易报关单",
+                    "key": "submit_form_1"
+                },
+                {
+                    "type": "pic_photo_or_album",
+                    "name": "外商投资企业报关单",
+                    "key": "submit_form_1"
+                }
+            ]
+        },
+        {
+            "type": "view",
+            "name": "我的",
+            "url": "http://jansenubuntu.cloudapp.net/showdoc/web/#/1"
+        }
+    ]
+}
