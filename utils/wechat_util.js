@@ -4,8 +4,9 @@ const config = require('../config/config');
 const https = require('https');
 const urlUtil = require('url');
 
-const config_env = config[config['environment']];
+const config_env = config[config.environment];
 
+db = DB();
 /*
     参数：
         menu_obj对象（参考：https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141013)
@@ -30,7 +31,8 @@ exports.update_menu = function(menu_obj){
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Content-Length': Buffer.byteLength(menu_str,'utf-8')
                 }
-            }
+            };
+
             var req = https.request(options, res => {
                 var buffer = [], result = '';
                 res.on('data', data => {
@@ -50,4 +52,9 @@ exports.update_menu = function(menu_obj){
             reject(err);
         });
     });
+};
+
+exports.user_valid = function(open_id, db){
+    sql = 'select * from t_wechat_user where openid = %s';
+    db.query(sql, [openid]);
 };

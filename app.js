@@ -24,8 +24,16 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
     for(var key in message){
         logger.debug('message.%s=%s', key, message[key]);
     }
+    var openid = message.FromUserName;
+
+    if(!openid){
+        res.reply('用户信息无效');
+        logger.error('用户信息无效');
+        return;
+    }
+    
     var repl_message = '';
-    switch(message.MsgType){
+    /* switch(message.MsgType){
         case 'text':
             repl_message = util.format('收到:%s', message.Content);
             break;
@@ -38,16 +46,16 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
         case 'video':
             repl_message = '收到你的视频';
             break;
-	case 'location':
-	    repl_message = '收到你的位置';
-	    break;
-	case 'link':
-	    repl_message = '收到你的链接';
-	    break;
+        case 'location':
+            repl_message = '收到你的位置';
+            break;
+        case 'link':
+            repl_message = '收到你的链接';
+            break;
         default:
             repl_message = 'Hello';
             break;
-    }
+    } */
     res.reply(repl_message);
 }));
 
