@@ -1,3 +1,4 @@
+//001 Hugh Add Update condition to suppprt Fix Value
 var mysql = require('mysql');
 var config = require('../config/config');
 var logger = require('./logger').logger;
@@ -65,9 +66,10 @@ exports.DB = DB = function(){
      * @param  {} table_name 表名:string
      * @param  {} fields set字段列表:{'field_1': 'value1', 'field_2': 'value2' ...}
      * @param  {} conditions where字段列表:{'field_1': 'value1', 'field_2': 'value2' ...}
+     * @param  {} fixValue where + 固定值
      * @param  {} cb 回调函数
      */
-    this.update = function(table_name,fields,conditions,cb){
+    this.update = function(table_name,fields,conditions,fixValue,cb){
         var params = [];
         var i = 1;
         var par = [];
@@ -88,6 +90,14 @@ exports.DB = DB = function(){
 
         var sql = "update " + table_name + " set " + tmp_fields.toString();
         sql += " where " + tmp_conditions.join(" and ");
+
+        //001s
+        if (fixValue != '')
+        {
+            sql = sql +  " and " + fixValue;
+        }
+        //001e
+        logger.info(sql);
 
         if(config[env].db.print_sql){
             logger.info("update: " + sql);
