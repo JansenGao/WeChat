@@ -58,17 +58,18 @@ exports.update_menu = function(menu_obj){
 
 exports.user_valid = function(openid){
     return new Promise((reject, resolve) => {
-        sql = 'select * from t_wechat_user where openid = ?';
+        sql = 'select * from t_wechat_user where openid = ? and active = 1';
         db.query(sql, [openid], (err, result) => {
    	    if(err){
 	    	logger.error(err);
 	    	return reject('数据库出错');
 	    }
-            if(!result){
+            if(!result.length){
+	        logger.info('找不到用户');
                 return reject('请先点击"我的"进行注册。');
             }else{
 	        logger.info('找到用户');
-                return resolve(null);
+                return resolve(result[0]);
             }
         });
     });

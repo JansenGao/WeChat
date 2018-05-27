@@ -37,7 +37,7 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
     }
 
     wechat_util.user_valid(openid).then(
-        () => { return mq.insert_mq('in_pic_msg', {
+        (user) => { return mq.insert_mq('in_pic_msg', {
             			openid: openid,
             			messageId: message.MsgId,
             			messageType: msgType,
