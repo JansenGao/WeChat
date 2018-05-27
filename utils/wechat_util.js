@@ -70,13 +70,7 @@ exports.user_valid = function(message){
                 return reject('请先点击"我的"进行注册。');
             }else{
 	        logger.info('找到用户');
-                return resolve('in_pic_msg', {
-                    openid: openid,
-                    messageId: message.MsgId,
-                    messageType: message.MsgType,
-                    eventKey: message.EventKey,
-                    picUrl: message.PicUrl,
-                });
+                return resolve(result[0]);
             }
         });
     });

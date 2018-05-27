@@ -37,8 +37,18 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
     }
 
     wechat_util.user_valid(message)
-    .then(mq.insert_mq)
-    .then(
+    .then(((user) => {
+        return mq.insert_mq('in_pic_msg', {
+            openid: openid,
+            userEid: user.eid,
+            userEmail: user.email,
+            userName: user.name,
+            messageId: message.MsgId,
+            messageType: message.MsgType,
+            eventKey: message.EventKey,
+            picUrl: message.PicUrl,
+        });
+    }).then(
         () => {
 	        logger.info('用户表单已提交');
             return res.reply('你的表单已提交。');
