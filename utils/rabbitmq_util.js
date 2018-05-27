@@ -8,7 +8,7 @@ mq_addr = config.rabbitmq.address;
 
 /**
  * @param  {string} queue_name 队列名
- * @param  {object} message json对象消息
+ * @param  {object} msg_obj json对象消息
  */
 exports.insert_mq = function(queue_name, msg_obj){
     return new Promise((resolve, reject) => {

@@ -36,23 +36,16 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
         return res.reply('请提交图片到系统，点击"我的"可查看帮助');
     }
 
-    wechat_util.user_valid(openid).then(
-        (user) => { return mq.insert_mq('in_pic_msg', {
-            			openid: openid,
-            			messageId: message.MsgId,
-            			messageType: msgType,
-            			eventKey: message.EventKey,
-            			picUrl: message.PicUrl,
-        		});
-	}
-    ).then(
+    wechat_util.user_valid(message)
+    .then(mq.insert_mq)
+    .then(
         () => {
-	    logger.info('用户表单已提交');
+	        logger.info('用户表单已提交');
             return res.reply('你的表单已提交。');
         }
     ).catch(
         (err) => {
-	    logger.info(err);
+	        logger.info(err);
             return res.reply(err);
         }
     );

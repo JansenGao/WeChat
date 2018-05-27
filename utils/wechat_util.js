@@ -56,7 +56,8 @@ exports.update_menu = function(menu_obj){
     });
 };
 
-exports.user_valid = function(openid){
+exports.user_valid = function(message){
+    openid = message.FromUserName;
     return new Promise((reject, resolve) => {
         sql = 'select * from t_wechat_user where openid = ? and active = 1';
         db.query(sql, [openid], (err, result) => {
@@ -69,7 +70,13 @@ exports.user_valid = function(openid){
                 return reject('请先点击"我的"进行注册。');
             }else{
 	        logger.info('找到用户');
-                return resolve(result[0]);
+                return resolve('in_pic_msg', {
+                    openid: openid,
+                    messageId: message.MsgId,
+                    messageType: message.MsgType,
+                    eventKey: message.EventKey,
+                    picUrl: message.PicUrl,
+                });
             }
         });
     });
