@@ -3,10 +3,12 @@ const redis = require('./redis_util');
 const config = require('../config/config');
 const https = require('https');
 const urlUtil = require('url');
+const DB = require('./db_mysql').DB;
+const logger = require('./logger').logger;
 
 const config_env = config[config.environment];
+db = new DB();
 
-db = DB();
 /*
     参数：
         menu_obj对象（参考：https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141013)
@@ -54,13 +56,18 @@ exports.update_menu = function(menu_obj){
     });
 };
 
-exports.user_valid = function(open_id){
+exports.user_valid = function(openid){
     return new Promise((reject, resolve) => {
-        sql = 'select * from t_wechat_user where openid = %s';
+        sql = 'select * from t_wechat_user where openid = ?';
         db.query(sql, [openid], (err, result) => {
-            if(!length(result)){
+   	    if(err){
+	    	logger.error(err);
+	    	return reject('数据库出错');
+	    }
+            if(!result){
                 return reject('请先点击"我的"进行注册。');
             }else{
+	        logger.info('找到用户');
                 return resolve(null);
             }
         });

@@ -1,6 +1,6 @@
 var amqplib = require('amqplib');
 var config = require('../config/config');
-var logger = require('./logger');
+var logger = require('./logger').logger;
 
 config = config[config.environment];
 

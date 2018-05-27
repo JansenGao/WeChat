@@ -37,20 +37,23 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
     }
 
     wechat_util.user_valid(openid).then(
-        mq.insert_mq('in_pic_msg', {
-            openid: openid,
-            messageId: message.MsgId,
-            messageType: msgType,
-            eventKey: message.EventKey,
-            picUrl: message.PicUrl,
-        })
+        () => { return mq.insert_mq('in_pic_msg', {
+            			openid: openid,
+            			messageId: message.MsgId,
+            			messageType: msgType,
+            			eventKey: message.EventKey,
+            			picUrl: message.PicUrl,
+        		});
+	}
     ).then(
         () => {
-            res.reply('');
+	    logger.info('用户表单已提交');
+            return res.reply('你的表单已提交。');
         }
     ).catch(
         (err) => {
-            res.reply(err);
+	    logger.info(err);
+            return res.reply(err);
         }
     );
 }));

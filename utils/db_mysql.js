@@ -12,7 +12,10 @@ var pool = mysql.createPool({
     user            : config[env].db.user,
     port            : config[env].db.port || 3306,
     password        : config[env].db.password,
-    database        : config[env].db.database
+    database        : config[env].db.database,
+    connectTimeout  : 60 * 60 * 1000,
+    aquireTimeout   : 60 * 60 * 1000,
+    timeout         : 60 * 60 * 1000
 });
 
 exports.DB = DB = function(){
