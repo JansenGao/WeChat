@@ -45,7 +45,7 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
         }
     ).catch(
         (err) => {
-	        logger.info(err);
+	        logger.error(err);
             return res.reply(err);
         }
     );

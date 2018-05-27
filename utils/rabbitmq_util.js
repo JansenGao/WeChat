@@ -21,6 +21,7 @@ exports.insert_mq = function(queue_name, msg_obj){
                 return ok.then(function(){
                     ch.sendToQueue(queue_name, queue_msg, {deliveryMode: true});
                     ch.close();
+		    logger.info('消息队列发送成功');
                     return resolve();
                 }).catch(err => {
                     logger.error(err);
