@@ -54,7 +54,15 @@ exports.update_menu = function(menu_obj){
     });
 };
 
-exports.user_valid = function(open_id, db){
-    sql = 'select * from t_wechat_user where openid = %s';
-    db.query(sql, [openid]);
+exports.user_valid = function(open_id){
+    return new Promise((reject, resolve) => {
+        sql = 'select * from t_wechat_user where openid = %s';
+        db.query(sql, [openid], (err, result) => {
+            if(!length(result)){
+                return reject('请先点击"我的"进行注册。');
+            }else{
+                return resolve(null);
+            }
+        });
+    });
 };

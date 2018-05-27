@@ -3,6 +3,8 @@ var config = require('./config/config');
 var log4js = require('log4js');
 var util = require('util');
 var wechat = require('wechat');
+var wechat_util = require('./utils/wechat_util');
+var mq = require('./utils/rabbitmq_util');
 var redis = require('redis');
 var logger = require('./utils/logger').logger;
 var DB = require('./utils/db_mysql').DB;
@@ -25,38 +27,32 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
         logger.debug('message.%s=%s', key, message[key]);
     }
     var openid = message.FromUserName;
+    var msgType = message.MsgType;
 
     if(!openid){
-        res.reply('用户信息无效');
         logger.error('用户信息无效');
-        return;
+        return res.reply('用户信息无效');
+    }else if(msgType !== 'image'){
+        return res.reply('请提交图片到系统，点击"我的"可查看帮助');
     }
-    
-    var repl_message = '';
-    /* switch(message.MsgType){
-        case 'text':
-            repl_message = util.format('收到:%s', message.Content);
-            break;
-        case 'image':
-            repl_message = '收到你的图像';
-            break;
-        case 'voice':
-            repl_message = '收到你的音频';
-            break;
-        case 'video':
-            repl_message = '收到你的视频';
-            break;
-        case 'location':
-            repl_message = '收到你的位置';
-            break;
-        case 'link':
-            repl_message = '收到你的链接';
-            break;
-        default:
-            repl_message = 'Hello';
-            break;
-    } */
-    res.reply(repl_message);
+
+    wechat_util.user_valid(openid).then(
+        mq.insert_mq('in_pic_msg', {
+            openid: openid,
+            messageId: message.MsgId,
+            messageType: msgType,
+            eventKey: message.EventKey,
+            picUrl: message.PicUrl,
+        })
+    ).then(
+        () => {
+            res.reply('');
+        }
+    ).catch(
+        (err) => {
+            res.reply(err);
+        }
+    );
 }));
 
 const PORT = config[env].port;
