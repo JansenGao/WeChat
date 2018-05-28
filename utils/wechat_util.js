@@ -58,7 +58,7 @@ exports.update_menu = function(menu_obj){
 
 exports.user_valid = function(message){
     openid = message.FromUserName;
-    return new Promise((reject, resolve) => {
+    return new Promise((resolve, reject) => {
         sql = 'select * from t_wechat_user where openid = ? and active = 1';
         db.query(sql, [openid], (err, result) => {
    	    if(err){
