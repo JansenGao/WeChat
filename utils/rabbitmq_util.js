@@ -21,7 +21,7 @@ exports.insert_mq = function(queue_name, msg_obj){
                 return ok.then(function(){
                     ch.sendToQueue(queue_name, queue_msg, {deliveryMode: true});
                     ch.close();
-		    logger.info('消息队列发送成功');
+		            logger.info('消息队列发送成功');
                     return resolve();
                 }).catch(err => {
                     logger.error(err);
@@ -34,6 +34,31 @@ exports.insert_mq = function(queue_name, msg_obj){
         }).catch(err => {
             logger.error(err);
             return reject('消息队列地址出错');
+        });
+    });
+};
+
+/**
+ * @param  {} queue_name
+ */
+exports.receive_mq = (queue_name) => {
+    return new Promise((resolve, reject) => {
+        amqplib.connect(mq_addr).then(conn => {
+            return conn.createChannel();
+        }).then(ch => {
+            return ch.assertQueue(q).then(ok => {
+                return ch.consume(q, msg => { // 对消息的处理函数
+                    if(msg !== null){
+                        ch.ack(msg);
+                        return resolve(msg);
+                    }else{
+                        return reject('消息为空');
+                    }
+                });
+            });
+        }).catch(err => {
+            logger.error(err);
+            return reject(err);
         });
     });
 };

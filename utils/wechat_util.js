@@ -66,10 +66,10 @@ exports.user_valid = function(message){
 	    	return reject('数据库出错');
 	    }
             if(!result.length){
-	        logger.info('找不到用户');
+	            logger.info('找不到用户');
                 return reject('请先点击"我的"进行注册。');
             }else{
-	        logger.info('找到用户');
+	            logger.info('找到用户');
                 return resolve(result[0]);
             }
         });
