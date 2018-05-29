@@ -5,6 +5,7 @@ const https = require('https');
 const urlUtil = require('url');
 const DB = require('./db_mysql').DB;
 const logger = require('./logger').logger;
+const mq = require('./rabbitmq_util');
 
 const config_env = config[config.environment];
 db = new DB();
@@ -70,8 +71,24 @@ exports.user_valid = function(message){
                 return reject('请先点击"我的"进行注册。');
             }else{
 	            logger.info('找到用户');
-                return resolve(result[0]);
+                return resolve(message, result[0]);
             }
         });
+    });
+};
+/**
+ * @param  {} message 微信消息JSON对象
+ * @param  {} user DB查找到的用户
+ */
+exports.insert_in_msg_mq = function(message, user){
+    return mq.insert_mq('in_pic_msg', {
+        openid: message.FromUserName,
+        userEid: user.eid,
+        userEmail: user.email,
+        userName: user.name,
+        messageId: message.MsgId,
+        messageType: message.MsgType,
+        eventKey: message.EventKey,
+        picUrl: message.PicUrl
     });
 };

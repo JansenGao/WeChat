@@ -36,19 +36,10 @@ app.use('/', wechat(global.wechatConfig, function(req, res, next){
         return res.reply('请提交图片到系统，点击"我的"可查看帮助');
     }
 
-    wechat_util.user_valid(message)
-    .then((user) => {
-        return mq.insert_mq('in_pic_msg', {
-            openid: openid,
-            userEid: user.eid,
-            userEmail: user.email,
-            userName: user.name,
-            messageId: message.MsgId,
-            messageType: message.MsgType,
-            eventKey: message.EventKey,
-            picUrl: message.PicUrl
-        });
-    }).then(
+    wechat_util
+    .user_valid(message) // 判断用户是否存在
+    .then(wechat_util.insert_in_msg_mq) // 如果存在，将消息插入队列，然后回复
+    .then(
         () => {
 	        logger.info('用户表单已提交');
             return res.reply('你的表单已提交。');
