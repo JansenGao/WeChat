@@ -1,4 +1,5 @@
 var logger = require('../utils/logger').logger;
+var amqplib = require('amqplib');
 var rabbimq_util = require('../utils/rabbitmq_util');
 var config = require('../config/config');
 var request = require('request');
@@ -9,20 +10,17 @@ var DB = require('../utils/db_mysql').DB;
 config = config[config.environment];
 download_path = config.download_path;
 download_base_url = config.download_base_url;
+const amqp_address = config.rabbitmq.address;
 
 db = new DB();
 
-logger.info('消费者进程启动');
-
 /**
- * @param  {} msg 消息队列订阅的消息
+ * @param  {} msg_json 消息队列订阅的JSON对象
  * @returns Promise对象
  */
-function download_from_queue(msg){
+function download_from_queue(msg_json){
     return new Promise((resolve, reject) => {
-		    logger.info(msg);
-        // 将msg转换为json
-        msg_json = JSON.parse(msg);
+		logger.info(msg_json);
 
         url = msg_json.picUrl;
         msgID = msg_json.messageId;
@@ -30,7 +28,7 @@ function download_from_queue(msg){
         logger.info('下载到', dest_path);
 
         var stream = request(url).pipe(fs.createWriteStream(dest_path));
-	msg_json.downloadUrl = download_base_url + msgID + '.jpeg';
+	    msg_json.downloadUrl = download_base_url + msgID + '.jpeg';
         stream.on('finish', () => {
             resolve(msg_json);
         });
@@ -41,7 +39,7 @@ function download_from_queue(msg){
 }
 
 /**
- * @param  {} msg_json 消息json对象
+ * @param  {} msg_json 消息JSON对象
  * @returns Promise对象
  */
 function save_to_db(msg_json){
@@ -65,11 +63,23 @@ function save_to_db(msg_json){
     });
 }
 
-rabbimq_util.receive_mq('in_pic_msg')
-    .then(download_from_queue)
-    .then(save_to_db)
-    .catch(err => {
-        logger.error(err);
-    });
+logger.info('消费者进程启动');
 
+amqplib.connect(amqp_address).then( conn => {
+    conn.on('ready', () => {
+        conn.queue('in_pic_msg', queue => {
+            queue.bind('#');
+            queue.subscribe(message => {
+                encoded_payload = unescape(message.data);
+                msg_json = JSON.parse(encoded_payload);
+
+                download_from_queue(msg_json)
+                    .then(save_to_db)
+                    .catch(err => {
+                        logger.error(err);
+                    })
+            });
+        })
+    });
+});
 

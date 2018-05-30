@@ -21,6 +21,7 @@ exports.insert_mq = function(queue_name, msg_obj){
                 return ok.then(function(){
                     ch.sendToQueue(queue_name, queue_msg, {deliveryMode: true});
                     ch.close();
+                    conn.close();
 		            logger.info('消息队列发送成功');
                     return resolve();
                 }).catch(err => {
@@ -40,6 +41,7 @@ exports.insert_mq = function(queue_name, msg_obj){
 
 /**
  * @param  {} queue_name
+ * 此函数返回的消费者只会被调用一次，不适合持续接收消息的场景。
  */
 exports.receive_mq = (queue_name) => {
     return new Promise((resolve, reject) => {
@@ -50,6 +52,7 @@ exports.receive_mq = (queue_name) => {
                 return ch.consume(queue_name, msg => { // 对消息的处理函数
                     if(msg !== null){
                         ch.ack(msg);
+                        conn.close();
                         return resolve(msg.content.toString());
                     }else{
                         return reject('消息为空');
