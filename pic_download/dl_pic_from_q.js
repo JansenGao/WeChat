@@ -65,21 +65,27 @@ function save_to_db(msg_json){
 
 logger.info('消费者进程启动');
 
-amqplib.connect(amqp_address).then( conn => {
-    conn.on('ready', () => {
-        conn.queue('in_pic_msg', queue => {
-            queue.bind('#');
-            queue.subscribe(message => {
-                encoded_payload = unescape(message.data);
-                msg_json = JSON.parse(encoded_payload);
-
-                download_from_queue(msg_json)
-                    .then(save_to_db)
-                    .catch(err => {
-                        logger.error(err);
-                    })
-            });
-        })
-    });
+require('amqplib/callback_api').connect(amqp_address, (err, conn) => {
+		    if(err)
+		            return logger.error(err);
+			        
+			        conn.createChannel((err, ch) => {
+					        if(err)
+						            return logger.error(err);
+							            
+							            q = 'in_pic_msg'
+								            ch.assertQueue(q);
+									            ch.consume(q, msg => {
+											                if(msg){
+													                ch.ack(msg);
+															                msg_json = JSON.parse(msg.content.toString());
+																	                download_from_queue(msg_json)
+																			                    .then(save_to_db)
+																					                        .catch(err => {
+																									                        logger.error(err);
+																												                    })
+																								            }
+																									            });
+										        })
 });
 
