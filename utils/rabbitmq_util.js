@@ -46,11 +46,11 @@ exports.receive_mq = (queue_name) => {
         amqplib.connect(mq_addr).then(conn => {
             return conn.createChannel();
         }).then(ch => {
-            return ch.assertQueue(q).then(ok => {
-                return ch.consume(q, msg => { // 对消息的处理函数
+            return ch.assertQueue(queue_name).then(ok => {
+                return ch.consume(queue_name, msg => { // 对消息的处理函数
                     if(msg !== null){
                         ch.ack(msg);
-                        return resolve(msg);
+                        return resolve(msg.content.toString());
                     }else{
                         return reject('消息为空');
                     }

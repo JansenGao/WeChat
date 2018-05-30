@@ -8,8 +8,11 @@ var DB = require('../utils/db_mysql').DB;
 
 config = config[config.environment];
 download_path = config.download_path;
+download_base_url = config.download_base_url;
 
 db = new DB();
+
+logger.info('消费者进程启动');
 
 /**
  * @param  {} msg 消息队列订阅的消息
@@ -17,6 +20,7 @@ db = new DB();
  */
 function download_from_queue(msg){
     return new Promise((resolve, reject) => {
+		    logger.info(msg);
         // 将msg转换为json
         msg_json = JSON.parse(msg);
 
@@ -26,6 +30,7 @@ function download_from_queue(msg){
         logger.info('下载到', dest_path);
 
         var stream = request(url).pipe(fs.createWriteStream(dest_path));
+	msg_json.downloadUrl = download_base_url + msgID + '.jpeg';
         stream.on('finish', () => {
             resolve(msg_json);
         });
@@ -44,7 +49,7 @@ function save_to_db(msg_json){
         var sql = 'insert into tb_picstore(formid, url, openid, fromuser, timestamp, upd_flg, accept) values(?, ?, ?, ?, now(), ?, ?)';
         var params = [];
         params.push(msg_json.messageId);
-        params.push(msg_json.picUrl);
+        params.push(msg_json.downloadUrl);
         params.push(msg_json.openid);
         params.push(msg_json.userName);
         params.push('N');
@@ -54,6 +59,7 @@ function save_to_db(msg_json){
             if(err){
                 return reject(err);
             }
+	    logger.info('数据库保存成功');
             return resolve(msg_json); // 继续将msg抛给下一个promise
         });
     });
