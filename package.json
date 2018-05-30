@@ -20,10 +20,12 @@
   },
   "homepage": "https://github.com/JansenGao/WeChat#readme",
   "dependencies": {
+    "amqplib": "^0.5.2",
     "express": "^4.16.3",
     "log4js": "^2.5.3",
     "mysql": "^2.15.0",
     "redis": "^2.8.0",
+    "request": "^2.87.0",
     "underscore": "^1.8.3",
     "wechat": "^2.1.0"
   },

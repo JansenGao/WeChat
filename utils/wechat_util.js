@@ -3,10 +3,13 @@ const redis = require('./redis_util');
 const config = require('../config/config');
 const https = require('https');
 const urlUtil = require('url');
+const DB = require('./db_mysql').DB;
+const logger = require('./logger').logger;
+const mq = require('./rabbitmq_util');
 
 const config_env = config[config.environment];
+db = new DB();
 
-db = DB();
 /*
     参数：
         menu_obj对象（参考：https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141013)
@@ -54,7 +57,38 @@ exports.update_menu = function(menu_obj){
     });
 };
 
-exports.user_valid = function(open_id, db){
-    sql = 'select * from t_wechat_user where openid = %s';
-    db.query(sql, [openid]);
+exports.user_valid = function(message){
+    openid = message.FromUserName;
+    return new Promise((resolve, reject) => {
+        sql = 'select * from t_wechat_user where openid = ? and active = 1';
+        db.query(sql, [openid], (err, result) => {
+   	    if(err){
+	    	logger.error(err);
+	    	return reject('数据库出错');
+	    }
+            if(!result.length){
+	            logger.info('找不到用户');
+                return reject('请先点击"我的"进行注册。');
+            }else{
+	            logger.info('找到用户');
+                return resolve(message, result[0]);
+            }
+        });
+    });
+};
+/**
+ * @param  {} message 微信消息JSON对象
+ * @param  {} user DB查找到的用户
+ */
+exports.insert_in_msg_mq = function(message, user){
+    return mq.insert_mq('in_pic_msg', {
+        openid: message.FromUserName,
+        userEid: user.eid,
+        userEmail: user.email,
+        userName: user.name,
+        messageId: message.MsgId,
+        messageType: message.MsgType,
+        eventKey: message.EventKey,
+        picUrl: message.PicUrl
+    });
 };
