@@ -57,7 +57,7 @@ function save_to_db(msg_json){
             if(err){
                 return reject(err);
             }
-	    logger.info('数据库保存成功');
+	        logger.info('数据库保存成功');
             return resolve(msg_json); // 继续将msg抛给下一个promise
         });
     });
@@ -66,26 +66,26 @@ function save_to_db(msg_json){
 logger.info('消费者进程启动');
 
 require('amqplib/callback_api').connect(amqp_address, (err, conn) => {
-		    if(err)
-		            return logger.error(err);
+	if(err)
+		return logger.error(err);
 			        
-			        conn.createChannel((err, ch) => {
-					        if(err)
-						            return logger.error(err);
+	conn.createChannel((err, ch) => {
+		if(err)
+			return logger.error(err);
 							            
-							            q = 'in_pic_msg'
-								            ch.assertQueue(q);
-									            ch.consume(q, msg => {
-											                if(msg){
-													                ch.ack(msg);
-															                msg_json = JSON.parse(msg.content.toString());
-																	                download_from_queue(msg_json)
-																			                    .then(save_to_db)
-																					                        .catch(err => {
-																									                        logger.error(err);
-																												                    })
-																								            }
-																									            });
-										        })
+		q = 'in_pic_msg';
+		ch.assertQueue(q);
+        ch.consume(q, msg => {
+            if(msg){
+                ch.ack(msg);
+                msg_json = JSON.parse(msg.content.toString());
+                download_from_queue(msg_json)
+                .then(save_to_db)
+                .catch(err => {
+                    logger.error(err);
+                });
+            }
+        });
+    });
 });
 
