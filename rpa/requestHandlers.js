@@ -37,7 +37,7 @@ function imageList(request, response) {
         return;
     }
 
-    var sqlQuery = "select formid,url,openid,fromuser,timestamp from tb_picstore where (upd_flg = 'N' or upd_flg is null) LIMIT 100";
+    var sqlQuery = "select formid,url,openid,fromuser,DATE_FORMAT(timestamp,'%Y-%m-%d %H:%i:%s') as timestamp  from tb_picstore where (upd_flg = 'N' or upd_flg is null) LIMIT 100";
     logger.info(DBobj.query);
     DBobj.query(sqlQuery,null,function (err, result) {
     if(err){
