@@ -3,6 +3,9 @@ var url = require('url');
 var config = require('../config/config'); 
 
 var logger = require('../utils/logger').logger;
+
+var mq = require('../utils/rabbitmq_util');
+
 //SQL 
 var DB = require('../utils/db_mysql').DB;
 var DBobj = new DB();
@@ -10,8 +13,6 @@ var DBobj = new DB();
 //App_token
 var env = config.environment;
 var appToken =  config[env].rpa.app_token;
-
-
 
 
 // 存放不同的处理程序，和请求的URL相对应
@@ -119,6 +120,45 @@ function result(request, response) {
                 writeError(response,errMsg);
             }else
             {
+            //往Rbiiitmq队列插入数据
+            var errMsgDB = "数据库出错";
+            var message = {openid:"",messageId:"",messageCreateTime:null};
+            var user = {userEid:"",userEmail:"",userName:""};
+            var sql = 'select openid,messageId,messageCreateTime from tb_picstore where formid = ?';
+            DBobj.query(sql, [formidNode.value], (err, result) => {
+            if(err){
+                    logger.error(err);
+                    writeError(response,errMsgDB);
+                    return;
+                }
+                for (var i = 0; i < result.length; i++) {
+                message.openid = result[i].openid;
+                message.messageId=result[i].messageId;
+                message.messageCreateTime= result[i].messageCreateTime;
+                break;
+                }
+                sql = 'select * from t_wechat_user where openid = ? and active = 1';
+                DBobj.query(sql, [message.openid], (err, result) => {
+                if(err){
+                        logger.error(err);
+                        writeError(response,errMsgDB);
+                        return;
+                        }
+                if(!result.length){
+                    logger.info('找不到用户');
+                    return;
+                    }else{
+                    for (var i = 0; i < result.length; i++) {
+                        user.userEid = result[i].eid;
+                        user.userEmail=result[i].email;
+                        user.userName= result[i].name;
+                        break;
+                        }
+                        insert_rpa_conf_msg(message,user);
+                    }
+                });
+            });
+
                 logger.info(suceessRes);
                 response.writeHead(200, {"Content-type": "text/plain"});
                 response.write(JSON.stringify(suceessRes));
@@ -168,6 +208,21 @@ function checkToken(app_token)
         return true;
     }
     return false;
+}
+function insert_rpa_conf_msg (message, user){
+    var now=Math.round(new Date().getTime()/1000);
+    var rdMQJson =  {
+        openid: message.openid,
+        userEid: user.userEid,
+        userEmail: user.userEmail,
+        userName: user.userName,
+        messageId: message.messageId,
+        messageCreateTime:message.messageCreateTime,
+        confirmTime: now,
+        userMessage: "你的表单已被录入系统"
+    };
+    logger.info(rdMQJson);
+    return mq.insert_mq('rpa_conf_msg', rdMQJson);
 }
 
 exports.imageList = imageList;

@@ -6,8 +6,8 @@ var server = require("./server"),
 var handle = {};
 
 handle["/"] = requestHandlers.error;
-handle["/rpa/imageList"] = requestHandlers.imageList;
-handle["/rpa/result"] = requestHandlers.result;
+handle["imageList"] = requestHandlers.imageList;
+handle["result"] = requestHandlers.result;
 
 // 传入路由模块方法, 路径处理方法
 server.start(router.route, handle);
