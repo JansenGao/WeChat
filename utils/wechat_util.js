@@ -88,6 +88,7 @@ exports.insert_in_msg_mq = function(message, user){
         userName: user.name,
         messageId: message.MsgId,
         messageType: message.MsgType,
+        createTime: message.CreateTime,
         eventKey: message.EventKey,
         picUrl: message.PicUrl
     });

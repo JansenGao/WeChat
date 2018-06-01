@@ -55,7 +55,7 @@ function save_to_db(msg_json){
         params.push('N');
         params.push('N');
         params.push(msg_json.messageId);
-        params.push(new Date(msg_json.CreateTime * 1000));
+        params.push(new Date(msg_json.createTime * 1000));
     
         db.query(sql, params, (err, results) => {
             if(err){
