@@ -44,7 +44,9 @@ function download_from_queue(msg_json){
  */
 function save_to_db(msg_json){
     return new Promise((resolve, reject) => {
-        var sql = 'insert into tb_picstore(formid, url, openid, fromuser, timestamp, upd_flg, accept) values(?, ?, ?, ?, now(), ?, ?)';
+        var sql = 'insert into tb_picstore(formid, url, openid, fromuser,';
+        sql += ' timestamp, upd_flg, accept, messageId, messageCreateTime)';
+        sql += ' values(?, ?, ?, ?, now(), ?, ?)';
         var params = [];
         params.push(msg_json.messageId);
         params.push(msg_json.downloadUrl);
@@ -52,6 +54,8 @@ function save_to_db(msg_json){
         params.push(msg_json.userName);
         params.push('N');
         params.push('N');
+        params.push(msg_json.messageId);
+        params.push(new Date(msg_json.CreateTime * 1000));
     
         db.query(sql, params, (err, results) => {
             if(err){
