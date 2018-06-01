@@ -71,7 +71,7 @@ exports.user_valid = function(message){
                 return reject('请先点击"我的"进行注册。');
             }else{
 	            logger.info('找到用户');
-                return resolve(message, result[0]);
+                return resolve({message: message, user: result[0]});
             }
         });
     });
@@ -80,7 +80,10 @@ exports.user_valid = function(message){
  * @param  {} message 微信消息JSON对象
  * @param  {} user DB查找到的用户
  */
-exports.insert_in_msg_mq = function(message, user){
+exports.insert_in_msg_mq = function(obj){
+	message = obj.message;
+	user = obj.user;
+	logger.info(message, user);
     return mq.insert_mq('in_pic_msg', {
         openid: message.FromUserName,
         userEid: user.eid,
