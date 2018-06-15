@@ -8,49 +8,19 @@ var mq = require('./utils/rabbitmq_util');
 var redis = require('redis');
 var logger = require('./utils/logger').logger;
 var DB = require('./utils/db_mysql').DB;
+var routesWechat = require('./routes/wechat');
 
 app = express();
 
 var env = config.environment;
-global.wechatConfig = {
-    token: config[env].wechat.token,
-    appid: config[env].wechat.appid,
-    encodingAESKey: config[env].wechat.aeskey,
-    checkSignature: true
-};
 
 app.use(express.query());
-app.use('/', wechat(global.wechatConfig, function(req, res, next){
-    logger.debug('收到请求');
-    var message = req.weixin;
-    for(var key in message){
-        logger.debug('message.%s=%s', key, message[key]);
-    }
-    var openid = message.FromUserName;
-    var msgType = message.MsgType;
 
-    if(!openid){
-        logger.error('用户信息无效');
-        return res.reply('用户信息无效');
-    }else if(msgType !== 'image'){
-        return res.reply('请提交图片到系统，点击"我的"可查看帮助');
-    }
+// 自动回复
+app.all('/', routesWechat.autoReply);
 
-    wechat_util
-    .user_valid(message) // 判断用户是否存在
-    .then(wechat_util.insert_in_msg_mq) // 如果存在，将消息插入队列，然后回复
-    .then(
-        () => {
-	        logger.info('用户表单已提交');
-            return res.reply('你的表单已提交。');
-        }
-    ).catch(
-        (err) => {
-	        logger.error(err);
-            return res.reply(err);
-        }
-    );
-}));
+// 公众号后台，所有API需要验证从微信端进入，需要用微信验证中间件
+app.all('/wechat/index', routesWechat.middleware_login_wechat);
 
 const PORT = config[env].port;
 app.listen(PORT, () => {
