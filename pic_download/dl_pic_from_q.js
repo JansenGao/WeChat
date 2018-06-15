@@ -46,7 +46,7 @@ function save_to_db(msg_json){
     return new Promise((resolve, reject) => {
         var sql = 'insert into tb_picstore(formid, url, openid, fromuser,';
         sql += ' timestamp, upd_flg, accept, messageId, messageCreateTime)';
-        sql += ' values(?, ?, ?, ?, now(), ?, ?)';
+        sql += ' values(?, ?, ?, ?, now(), ?, ?, ?, ?)';
         var params = [];
         params.push(msg_json.messageId);
         params.push(msg_json.downloadUrl);
